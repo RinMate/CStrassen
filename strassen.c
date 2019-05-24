@@ -116,14 +116,18 @@ dmatrix dmatrix_strassen_recursive(dmatrix A, dmatrix B){
 		Bs[i] = dmatrix_new(n, n);
 	}
 
-	REP(i, n) REP(j, n) As[0]->A[i*n + j] = A->A[i*N + j];
-	REP(i, n) REP(j, n) As[1]->A[i*n + j] = A->A[i*N + (n+j)];
-	REP(i, n) REP(j, n) As[2]->A[i*n + j] = A->A[(n+i)*N + j];
-	REP(i, n) REP(j, n) As[3]->A[i*n + j] = A->A[(n+i)*N + (n+j)];
-	REP(i, n) REP(j, n) Bs[0]->A[i*n + j] = B->A[i*N + j];
-	REP(i, n) REP(j, n) Bs[1]->A[i*n + j] = B->A[i*N + (n+j)];
-	REP(i, n) REP(j, n) Bs[2]->A[i*n + j] = B->A[(n+i)*N + j];
-	REP(i, n) REP(j, n) Bs[3]->A[i*n + j] = B->A[(n+i)*N + (n+j)];
+	REP(i, n){
+		REP(j, n){
+			As[0]->A[i*n + j] = A->A[i*N + j];
+			As[1]->A[i*n + j] = A->A[i*N + (n+j)];
+			As[2]->A[i*n + j] = A->A[(n+i)*N + j];
+			As[3]->A[i*n + j] = A->A[(n+i)*N + (n+j)];
+			Bs[0]->A[i*n + j] = B->A[i*N + j];
+			Bs[1]->A[i*n + j] = B->A[i*N + (n+j)];
+			Bs[2]->A[i*n + j] = B->A[(n+i)*N + j];
+			Bs[3]->A[i*n + j] = B->A[(n+i)*N + (n+j)];
+		}
+	}
 
 	dmatrix *tmps;
 	NEW(tmps, 10);
@@ -149,10 +153,14 @@ dmatrix dmatrix_strassen_recursive(dmatrix A, dmatrix B){
 	P[6] = dmatrix_strassen_recursive(tmps[8], tmps[9]);  // P7 = (A12-A22)(B21+B22)
 
 	dmatrix C = dmatrix_new(N, N);
-	REP(i, n) REP(j, n) C->A[i*N + j] = P[0]->A[i*n + j] + P[3]->A[i*n + j] - P[4]->A[i*n + j] + P[6]->A[i*n + j];  // C11 = P1 + P4 - P5 + P7
-	REP(i, n) REP(j, n) C->A[i*N + (n+j)] = P[2]->A[i*n + j] + P[4]->A[i*n + j];  // C12 = P3 + P5
-	REP(i, n) REP(j, n) C->A[(n+i)*N + j] = P[1]->A[i*n + j] + P[3]->A[i*n + j];  // C21 = P2 + P4
-	REP(i, n) REP(j, n) C->A[(n+i)*N + (n+j)] = P[0]->A[i*n + j] + P[2]->A[i*n + j] - P[1]->A[i*n + j] + P[5]->A[i*n + j];  // C22 = P1 + P3 - P2 + P6
+	REP(i, n){
+		REP(j, n){
+			C->A[i*N + j] = P[0]->A[i*n + j] + P[3]->A[i*n + j] - P[4]->A[i*n + j] + P[6]->A[i*n + j];  // C11 = P1 + P4 - P5 + P7
+			C->A[i*N + (n+j)] = P[2]->A[i*n + j] + P[4]->A[i*n + j];  // C12 = P3 + P5
+			C->A[(n+i)*N + j] = P[1]->A[i*n + j] + P[3]->A[i*n + j];  // C21 = P2 + P4
+			C->A[(n+i)*N + (n+j)] = P[0]->A[i*n + j] + P[2]->A[i*n + j] - P[1]->A[i*n + j] + P[5]->A[i*n + j];  // C22 = P1 + P3 - P2 + P6
+		}
+	}
 
 	REPR(i, 3) { dmatrix_free(Bs[i]); dmatrix_free(As[i]); } 
 	free(Bs); free(As); 
